@@ -68,7 +68,7 @@ resource "oci_core_security_list" "socks5_sl" {
     protocol    = "all"
   }
 
-  # SSH on port 22
+  # SSH access
   ingress_security_rules {
     protocol = "6" # TCP
     source   = "0.0.0.0/0"
@@ -76,17 +76,6 @@ resource "oci_core_security_list" "socks5_sl" {
     tcp_options {
       min = 22
       max = 22
-    }
-  }
-
-  # SSH on port 2222 (alternative)
-  ingress_security_rules {
-    protocol = "6" # TCP
-    source   = "0.0.0.0/0"
-
-    tcp_options {
-      min = 2222
-      max = 2222
     }
   }
 
@@ -113,7 +102,14 @@ resource "oci_core_subnet" "socks5_subnet" {
   security_list_ids = [oci_core_security_list.socks5_sl.id]
 }
 
-
+# Create Bastion
+resource "oci_bastion_bastion" "socks5_bastion" {
+  bastion_type                 = "STANDARD"
+  compartment_id               = var.tenancy_ocid
+  target_subnet_id             = oci_core_subnet.socks5_subnet.id
+  client_cidr_block_allow_list = ["0.0.0.0/0"]
+  name                         = "socks5-bastion"
+}
 
 # Create Instance
 resource "oci_core_instance" "socks5_instance" {
@@ -133,17 +129,35 @@ resource "oci_core_instance" "socks5_instance" {
     source_id   = data.oci_core_images.ubuntu.images[0].id
   }
 
+  agent_config {
+    are_all_plugins_disabled = false
+    is_management_disabled   = false
+    is_monitoring_disabled   = false
+
+    plugins_config {
+      name          = "Bastion"
+      desired_state = "ENABLED"
+    }
+  }
+
   metadata = {
     ssh_authorized_keys = var.ssh_public_key
     user_data = base64gzip(templatefile("${path.module}/cloud-init.tpl", {
-      ubuntu_password = var.ubuntu_password
-      socks5_port     = var.socks5_port
+      socks5_port = var.socks5_port
     }))
   }
 }
 
 output "instance_public_ip" {
   value = oci_core_instance.socks5_instance.public_ip
+}
+
+output "instance_id" {
+  value = oci_core_instance.socks5_instance.id
+}
+
+output "bastion_id" {
+  value = oci_bastion_bastion.socks5_bastion.id
 }
 
 output "socks5_connection" {

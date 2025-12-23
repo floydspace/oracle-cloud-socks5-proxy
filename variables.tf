@@ -29,12 +29,6 @@ variable "ssh_public_key" {
   type        = string
 }
 
-variable "ubuntu_password" {
-  description = "Password for the ubuntu user"
-  type        = string
-  sensitive   = true
-}
-
 variable "socks5_port" {
   description = "Port for the SOCKS5 proxy"
   type        = number

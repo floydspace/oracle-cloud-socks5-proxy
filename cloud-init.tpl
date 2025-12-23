@@ -1,19 +1,10 @@
 #cloud-config
 package_update: true
-package_upgrade: true
+package_upgrade: false
 packages:
   - git
   - gcc
   - make
-
-# Set password for ubuntu user
-chpasswd:
-  list: |
-    ubuntu:${ubuntu_password}
-  expire: false
-
-# Enable password authentication
-ssh_pwauth: true
 
 runcmd:
   # Install microsocks

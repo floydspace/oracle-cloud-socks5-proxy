@@ -6,5 +6,4 @@ fingerprint      = "xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx"
 private_key_path = "~/.oci/oci_api_key.pem"
 region           = "eu-amsterdam-1"
 ssh_public_key   = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC... your_email@example.com"
-ubuntu_password  = "YourSecurePasswordHere"
 socks5_port      = 1080 # Default
