@@ -90,14 +90,14 @@ resource "oci_core_security_list" "socks5_sl" {
     }
   }
 
-  # SOCKS5 on port 443
+  # SOCKS5 proxy port
   ingress_security_rules {
     protocol = "6" # TCP
     source   = "0.0.0.0/0"
 
     tcp_options {
-      min = 443
-      max = 443
+      min = var.socks5_port
+      max = var.socks5_port
     }
   }
 }
@@ -137,6 +137,7 @@ resource "oci_core_instance" "socks5_instance" {
     ssh_authorized_keys = var.ssh_public_key
     user_data = base64gzip(templatefile("${path.module}/cloud-init.tpl", {
       ubuntu_password = var.ubuntu_password
+      socks5_port     = var.socks5_port
     }))
   }
 }
@@ -146,5 +147,5 @@ output "instance_public_ip" {
 }
 
 output "socks5_connection" {
-  value = "socks5://${oci_core_instance.socks5_instance.public_ip}:443"
+  value = "socks5://${oci_core_instance.socks5_instance.public_ip}:${var.socks5_port}"
 }

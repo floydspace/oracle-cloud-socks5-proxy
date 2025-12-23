@@ -34,3 +34,9 @@ variable "ubuntu_password" {
   type        = string
   sensitive   = true
 }
+
+variable "socks5_port" {
+  description = "Port for the SOCKS5 proxy"
+  type        = number
+  default     = 1080
+}

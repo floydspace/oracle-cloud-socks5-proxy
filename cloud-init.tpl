@@ -23,11 +23,11 @@ runcmd:
   - make
   - cp microsocks /usr/local/bin/
   - chmod +x /usr/local/bin/microsocks
-  
-  # Fix Oracle's iptables rules - add port 443 BEFORE the REJECT rule
-  - iptables -I INPUT 5 -p tcp --dport 443 -j ACCEPT
+
+  # Fix Oracle's iptables rules - add SOCKS5 port BEFORE the REJECT rule
+  - iptables -I INPUT 5 -p tcp --dport ${socks5_port} -j ACCEPT
   - netfilter-persistent save
-  
+
   # Create systemd service
   - |
     cat > /etc/systemd/system/microsocks.service <<'EOL'
@@ -37,7 +37,7 @@ runcmd:
 
     [Service]
     Type=simple
-    ExecStart=/usr/local/bin/microsocks -i 0.0.0.0 -p 443
+    ExecStart=/usr/local/bin/microsocks -i 0.0.0.0 -p ${socks5_port}
     Restart=always
 
     [Install]
