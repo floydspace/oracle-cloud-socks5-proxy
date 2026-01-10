@@ -113,14 +113,16 @@ resource "oci_bastion_bastion" "socks5_bastion" {
 
 # Create Instance
 resource "oci_core_instance" "socks5_instance" {
+  count = 2
+
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   compartment_id      = var.tenancy_ocid
-  display_name        = "socks5-proxy"
+  display_name        = "socks5-proxy-${count.index}"
   shape               = "VM.Standard.E2.1.Micro"
 
   create_vnic_details {
     subnet_id        = oci_core_subnet.socks5_subnet.id
-    display_name     = "socks5-vnic"
+    display_name     = "socks5-vnic-${count.index}"
     assign_public_ip = true
   }
 
@@ -148,18 +150,18 @@ resource "oci_core_instance" "socks5_instance" {
   }
 }
 
-output "instance_public_ip" {
-  value = oci_core_instance.socks5_instance.public_ip
+output "instance_public_ips" {
+  value = oci_core_instance.socks5_instance[*].public_ip
 }
 
-output "instance_id" {
-  value = oci_core_instance.socks5_instance.id
+output "instance_ids" {
+  value = oci_core_instance.socks5_instance[*].id
 }
 
 output "bastion_id" {
   value = oci_bastion_bastion.socks5_bastion.id
 }
 
-output "socks5_connection" {
-  value = "socks5://${oci_core_instance.socks5_instance.public_ip}:${var.socks5_port}"
+output "socks5_connections" {
+  value = [for instance in oci_core_instance.socks5_instance : "socks5://${instance.public_ip}:${var.socks5_port}"]
 }
